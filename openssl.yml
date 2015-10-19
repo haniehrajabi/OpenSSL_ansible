@@ -1,0 +1,30 @@
+---
+- name: Configure webserver with nginx
+  hosts: webservers
+  sudo: True
+  tasks:
+    - name: Check if Package is installed
+      command: dpkg-query -l openssl
+      register: is_installed
+      failed_when: is_installed.rc > 1
+      changed_when: no
+    
+    - name: Update if only installed (Ubuntu)
+      apt: name="{{ item }}" update_cache=yes
+      with_items:
+        - openssl=1.0.1-4ubuntu5.12
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '12.04' and is_installed.rc == 0  
+      
+
+    - name: Update if only installed (Wheezy)
+      apt: name="{{ item }}" update_cache=yes
+      with_items:
+        - openssl=1.0.1e-2+deb7u5
+      when: ansible_distribution == 'Debian' and ansible_distribution_release == 'wheezy' and is_installed.rc == 0
+
+
+    - name: Update if only installed (Wheezy)
+      apt: name="{{ item }}" update_cache=yes
+      with_items:
+        - openssl=1.0.1g-1
+      when: ansible_distribution == 'Debian' and ansible_distribution_release == 'jessie' and is_installed.rc == 0
